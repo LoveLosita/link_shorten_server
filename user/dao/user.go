@@ -10,7 +10,7 @@ import (
 
 func GetUserHashedPassword(userName string) (string, user.Status) {
 	var pwdUser model.User
-	result := Db.Table("users").Where("user_name = ?", userName).Find(&pwdUser)
+	result := Db.Table("users").Where("username = ?", userName).Find(&pwdUser)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			return "", response.WrongUsrName
@@ -39,4 +39,40 @@ func IfUsernameExists(name string) (bool, user.Status) {
 		return false, response.InternalErr(result.Error)
 	}
 	return true, user.Status{}
+}
+
+func IfEmailExists(email string) (bool, user.Status) {
+	var emailUser model.User
+	result := Db.Table("users").First(&emailUser, "email = ?", email)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return false, user.Status{}
+		}
+		return false, response.InternalErr(result.Error)
+	}
+	return true, user.Status{}
+}
+
+func IfPhoneNumberExists(phoneNumber string) (bool, user.Status) {
+	var phoneUser model.User
+	result := Db.Table("users").First(&phoneUser, "phone_number = ?", phoneNumber)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return false, user.Status{}
+		}
+		return false, response.InternalErr(result.Error)
+	}
+	return true, user.Status{}
+}
+
+func GetUserIDByName(name string) (int64, user.Status) {
+	var userID int64
+	result := Db.Table("users").Select("id").Where("username = ?", name).Scan(&userID)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return 0, response.WrongUsrName
+		}
+		return 0, response.InternalErr(result.Error)
+	}
+	return userID, user.Status{}
 }

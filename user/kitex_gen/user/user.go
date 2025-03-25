@@ -1100,8 +1100,8 @@ func (p *UserLoginRequest) Field2DeepEqual(src string) bool {
 }
 
 type UserLoginResponseData struct {
-	AccessToken  string `thrift:"access_token,1,required" frugal:"1,required,string" json:"access_token"`
-	RefreshToken string `thrift:"refresh_token,2,required" frugal:"2,required,string" json:"refresh_token"`
+	AccessToken  *string `thrift:"access_token,1,optional" frugal:"1,optional,string" json:"access_token,omitempty"`
+	RefreshToken *string `thrift:"refresh_token,2,optional" frugal:"2,optional,string" json:"refresh_token,omitempty"`
 }
 
 func NewUserLoginResponseData() *UserLoginResponseData {
@@ -1111,17 +1111,27 @@ func NewUserLoginResponseData() *UserLoginResponseData {
 func (p *UserLoginResponseData) InitDefault() {
 }
 
+var UserLoginResponseData_AccessToken_DEFAULT string
+
 func (p *UserLoginResponseData) GetAccessToken() (v string) {
-	return p.AccessToken
+	if !p.IsSetAccessToken() {
+		return UserLoginResponseData_AccessToken_DEFAULT
+	}
+	return *p.AccessToken
 }
 
+var UserLoginResponseData_RefreshToken_DEFAULT string
+
 func (p *UserLoginResponseData) GetRefreshToken() (v string) {
-	return p.RefreshToken
+	if !p.IsSetRefreshToken() {
+		return UserLoginResponseData_RefreshToken_DEFAULT
+	}
+	return *p.RefreshToken
 }
-func (p *UserLoginResponseData) SetAccessToken(val string) {
+func (p *UserLoginResponseData) SetAccessToken(val *string) {
 	p.AccessToken = val
 }
-func (p *UserLoginResponseData) SetRefreshToken(val string) {
+func (p *UserLoginResponseData) SetRefreshToken(val *string) {
 	p.RefreshToken = val
 }
 
@@ -1130,12 +1140,18 @@ var fieldIDToName_UserLoginResponseData = map[int16]string{
 	2: "refresh_token",
 }
 
+func (p *UserLoginResponseData) IsSetAccessToken() bool {
+	return p.AccessToken != nil
+}
+
+func (p *UserLoginResponseData) IsSetRefreshToken() bool {
+	return p.RefreshToken != nil
+}
+
 func (p *UserLoginResponseData) Read(iprot thrift.TProtocol) (err error) {
 
 	var fieldTypeId thrift.TType
 	var fieldId int16
-	var issetAccessToken bool = false
-	var issetRefreshToken bool = false
 
 	if _, err = iprot.ReadStructBegin(); err != nil {
 		goto ReadStructBeginError
@@ -1156,7 +1172,6 @@ func (p *UserLoginResponseData) Read(iprot thrift.TProtocol) (err error) {
 				if err = p.ReadField1(iprot); err != nil {
 					goto ReadFieldError
 				}
-				issetAccessToken = true
 			} else if err = iprot.Skip(fieldTypeId); err != nil {
 				goto SkipFieldError
 			}
@@ -1165,7 +1180,6 @@ func (p *UserLoginResponseData) Read(iprot thrift.TProtocol) (err error) {
 				if err = p.ReadField2(iprot); err != nil {
 					goto ReadFieldError
 				}
-				issetRefreshToken = true
 			} else if err = iprot.Skip(fieldTypeId); err != nil {
 				goto SkipFieldError
 			}
@@ -1182,15 +1196,6 @@ func (p *UserLoginResponseData) Read(iprot thrift.TProtocol) (err error) {
 		goto ReadStructEndError
 	}
 
-	if !issetAccessToken {
-		fieldId = 1
-		goto RequiredFieldNotSetError
-	}
-
-	if !issetRefreshToken {
-		fieldId = 2
-		goto RequiredFieldNotSetError
-	}
 	return nil
 ReadStructBeginError:
 	return thrift.PrependError(fmt.Sprintf("%T read struct begin error: ", p), err)
@@ -1205,28 +1210,26 @@ ReadFieldEndError:
 	return thrift.PrependError(fmt.Sprintf("%T read field end error", p), err)
 ReadStructEndError:
 	return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
-RequiredFieldNotSetError:
-	return thrift.NewTProtocolExceptionWithType(thrift.INVALID_DATA, fmt.Errorf("required field %s is not set", fieldIDToName_UserLoginResponseData[fieldId]))
 }
 
 func (p *UserLoginResponseData) ReadField1(iprot thrift.TProtocol) error {
 
-	var _field string
+	var _field *string
 	if v, err := iprot.ReadString(); err != nil {
 		return err
 	} else {
-		_field = v
+		_field = &v
 	}
 	p.AccessToken = _field
 	return nil
 }
 func (p *UserLoginResponseData) ReadField2(iprot thrift.TProtocol) error {
 
-	var _field string
+	var _field *string
 	if v, err := iprot.ReadString(); err != nil {
 		return err
 	} else {
-		_field = v
+		_field = &v
 	}
 	p.RefreshToken = _field
 	return nil
@@ -1266,14 +1269,16 @@ WriteStructEndError:
 }
 
 func (p *UserLoginResponseData) writeField1(oprot thrift.TProtocol) (err error) {
-	if err = oprot.WriteFieldBegin("access_token", thrift.STRING, 1); err != nil {
-		goto WriteFieldBeginError
-	}
-	if err := oprot.WriteString(p.AccessToken); err != nil {
-		return err
-	}
-	if err = oprot.WriteFieldEnd(); err != nil {
-		goto WriteFieldEndError
+	if p.IsSetAccessToken() {
+		if err = oprot.WriteFieldBegin("access_token", thrift.STRING, 1); err != nil {
+			goto WriteFieldBeginError
+		}
+		if err := oprot.WriteString(*p.AccessToken); err != nil {
+			return err
+		}
+		if err = oprot.WriteFieldEnd(); err != nil {
+			goto WriteFieldEndError
+		}
 	}
 	return nil
 WriteFieldBeginError:
@@ -1283,14 +1288,16 @@ WriteFieldEndError:
 }
 
 func (p *UserLoginResponseData) writeField2(oprot thrift.TProtocol) (err error) {
-	if err = oprot.WriteFieldBegin("refresh_token", thrift.STRING, 2); err != nil {
-		goto WriteFieldBeginError
-	}
-	if err := oprot.WriteString(p.RefreshToken); err != nil {
-		return err
-	}
-	if err = oprot.WriteFieldEnd(); err != nil {
-		goto WriteFieldEndError
+	if p.IsSetRefreshToken() {
+		if err = oprot.WriteFieldBegin("refresh_token", thrift.STRING, 2); err != nil {
+			goto WriteFieldBeginError
+		}
+		if err := oprot.WriteString(*p.RefreshToken); err != nil {
+			return err
+		}
+		if err = oprot.WriteFieldEnd(); err != nil {
+			goto WriteFieldEndError
+		}
 	}
 	return nil
 WriteFieldBeginError:
@@ -1322,16 +1329,26 @@ func (p *UserLoginResponseData) DeepEqual(ano *UserLoginResponseData) bool {
 	return true
 }
 
-func (p *UserLoginResponseData) Field1DeepEqual(src string) bool {
+func (p *UserLoginResponseData) Field1DeepEqual(src *string) bool {
 
-	if strings.Compare(p.AccessToken, src) != 0 {
+	if p.AccessToken == src {
+		return true
+	} else if p.AccessToken == nil || src == nil {
+		return false
+	}
+	if strings.Compare(*p.AccessToken, *src) != 0 {
 		return false
 	}
 	return true
 }
-func (p *UserLoginResponseData) Field2DeepEqual(src string) bool {
+func (p *UserLoginResponseData) Field2DeepEqual(src *string) bool {
 
-	if strings.Compare(p.RefreshToken, src) != 0 {
+	if p.RefreshToken == src {
+		return true
+	} else if p.RefreshToken == nil || src == nil {
+		return false
+	}
+	if strings.Compare(*p.RefreshToken, *src) != 0 {
 		return false
 	}
 	return true
@@ -1339,7 +1356,7 @@ func (p *UserLoginResponseData) Field2DeepEqual(src string) bool {
 
 type UserLoginResponse struct {
 	Status *Status                `thrift:"status,1,required" frugal:"1,required,Status" json:"status"`
-	Data   *UserLoginResponseData `thrift:"data,2,required" frugal:"2,required,UserLoginResponseData" json:"data"`
+	Data   *UserLoginResponseData `thrift:"data,2,optional" frugal:"2,optional,UserLoginResponseData" json:"data,omitempty"`
 }
 
 func NewUserLoginResponse() *UserLoginResponse {
@@ -1391,7 +1408,6 @@ func (p *UserLoginResponse) Read(iprot thrift.TProtocol) (err error) {
 	var fieldTypeId thrift.TType
 	var fieldId int16
 	var issetStatus bool = false
-	var issetData bool = false
 
 	if _, err = iprot.ReadStructBegin(); err != nil {
 		goto ReadStructBeginError
@@ -1421,7 +1437,6 @@ func (p *UserLoginResponse) Read(iprot thrift.TProtocol) (err error) {
 				if err = p.ReadField2(iprot); err != nil {
 					goto ReadFieldError
 				}
-				issetData = true
 			} else if err = iprot.Skip(fieldTypeId); err != nil {
 				goto SkipFieldError
 			}
@@ -1440,11 +1455,6 @@ func (p *UserLoginResponse) Read(iprot thrift.TProtocol) (err error) {
 
 	if !issetStatus {
 		fieldId = 1
-		goto RequiredFieldNotSetError
-	}
-
-	if !issetData {
-		fieldId = 2
 		goto RequiredFieldNotSetError
 	}
 	return nil
@@ -1533,14 +1543,16 @@ WriteFieldEndError:
 }
 
 func (p *UserLoginResponse) writeField2(oprot thrift.TProtocol) (err error) {
-	if err = oprot.WriteFieldBegin("data", thrift.STRUCT, 2); err != nil {
-		goto WriteFieldBeginError
-	}
-	if err := p.Data.Write(oprot); err != nil {
-		return err
-	}
-	if err = oprot.WriteFieldEnd(); err != nil {
-		goto WriteFieldEndError
+	if p.IsSetData() {
+		if err = oprot.WriteFieldBegin("data", thrift.STRUCT, 2); err != nil {
+			goto WriteFieldBeginError
+		}
+		if err := p.Data.Write(oprot); err != nil {
+			return err
+		}
+		if err = oprot.WriteFieldEnd(); err != nil {
+			goto WriteFieldEndError
+		}
 	}
 	return nil
 WriteFieldBeginError:
@@ -1999,7 +2011,7 @@ func (p *TokenRefreshResponseData) Field2DeepEqual(src string) bool {
 
 type TokenRefreshResponse struct {
 	Status *Status                   `thrift:"status,1,required" frugal:"1,required,Status" json:"status"`
-	Data   *TokenRefreshResponseData `thrift:"data,2,required" frugal:"2,required,TokenRefreshResponseData" json:"data"`
+	Data   *TokenRefreshResponseData `thrift:"data,2,optional" frugal:"2,optional,TokenRefreshResponseData" json:"data,omitempty"`
 }
 
 func NewTokenRefreshResponse() *TokenRefreshResponse {
@@ -2051,7 +2063,6 @@ func (p *TokenRefreshResponse) Read(iprot thrift.TProtocol) (err error) {
 	var fieldTypeId thrift.TType
 	var fieldId int16
 	var issetStatus bool = false
-	var issetData bool = false
 
 	if _, err = iprot.ReadStructBegin(); err != nil {
 		goto ReadStructBeginError
@@ -2081,7 +2092,6 @@ func (p *TokenRefreshResponse) Read(iprot thrift.TProtocol) (err error) {
 				if err = p.ReadField2(iprot); err != nil {
 					goto ReadFieldError
 				}
-				issetData = true
 			} else if err = iprot.Skip(fieldTypeId); err != nil {
 				goto SkipFieldError
 			}
@@ -2100,11 +2110,6 @@ func (p *TokenRefreshResponse) Read(iprot thrift.TProtocol) (err error) {
 
 	if !issetStatus {
 		fieldId = 1
-		goto RequiredFieldNotSetError
-	}
-
-	if !issetData {
-		fieldId = 2
 		goto RequiredFieldNotSetError
 	}
 	return nil
@@ -2193,14 +2198,16 @@ WriteFieldEndError:
 }
 
 func (p *TokenRefreshResponse) writeField2(oprot thrift.TProtocol) (err error) {
-	if err = oprot.WriteFieldBegin("data", thrift.STRUCT, 2); err != nil {
-		goto WriteFieldBeginError
-	}
-	if err := p.Data.Write(oprot); err != nil {
-		return err
-	}
-	if err = oprot.WriteFieldEnd(); err != nil {
-		goto WriteFieldEndError
+	if p.IsSetData() {
+		if err = oprot.WriteFieldBegin("data", thrift.STRUCT, 2); err != nil {
+			goto WriteFieldBeginError
+		}
+		if err := p.Data.Write(oprot); err != nil {
+			return err
+		}
+		if err = oprot.WriteFieldEnd(); err != nil {
+			goto WriteFieldEndError
+		}
 	}
 	return nil
 WriteFieldBeginError:

@@ -23,13 +23,13 @@ struct UserLoginRequest { #用户登录请求
 }
 
 struct UserLoginResponseData { #用户登录响应数据
-  1: required string access_token
-  2: required string refresh_token
+  1: optional string access_token
+  2: optional string refresh_token
 }
 
 struct UserLoginResponse { #用户登录响应
   1: required Status status
-  2: required UserLoginResponseData data #用户登录响应数据
+  2: optional UserLoginResponseData data #用户登录响应数据
 }
 
 struct TokenRefreshRequest { #刷新token请求
@@ -43,7 +43,7 @@ struct TokenRefreshResponseData { #刷新token响应数据
 
 struct TokenRefreshResponse { #刷新token响应
   1: required Status status
-  2: required TokenRefreshResponseData data #刷新token响应数据
+  2: optional TokenRefreshResponseData data #刷新token响应数据
 }
 
 service UserService {
