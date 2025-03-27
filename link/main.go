@@ -3,7 +3,8 @@ package main
 import (
 	"github.com/cloudwego/kitex/server"
 	"link_shorten_server/init_db"
-	user "link_shorten_server/user/kitex_gen/user/userservice"
+	link "link_shorten_server/link/kitex_gen/link/linkservice"
+	"link_shorten_server/redis"
 	"log"
 	"net"
 )
@@ -14,17 +15,17 @@ func main() {
 	if err != nil {
 		log.Fatalf("dao.ConnectDB error: %v", err)
 	}
-	/*//2.连接redis
+	//2.连接redis
 	err = redis.InitRedis()
 	if err != nil {
 		log.Fatalf("redis.InitRedis error: %v", err)
-	}*/
+	}
 	//3.启动服务
-	addr, err := net.ResolveTCPAddr("tcp", "127.0.0.1:8889")
+	addr, err := net.ResolveTCPAddr("tcp", "127.0.0.1:8890")
 	if err != nil {
 		log.Fatalf("net.ResolveTCPAddr error: %v", err)
 	}
-	svr := user.NewServer(new(UserServiceImpl), server.WithServiceAddr(addr))
+	svr := link.NewServer(new(LinkServiceImpl), server.WithServiceAddr(addr))
 	err = svr.Run()
 	if err != nil {
 		log.Println(err.Error())

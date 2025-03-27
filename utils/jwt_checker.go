@@ -38,7 +38,8 @@ func CheckJwtToken(token string) (int, user.Status) {
 			// 如果是访问令牌，可以设置用户ID并继续
 			/*c.Set("user_id", claims["user_id"])
 			return*/
-			return claims["user_id"].(int), user.Status{}
+			floatID := claims["user_id"].(float64)
+			return int(floatID), user.Status{}
 		} else {
 			return -1, response.WrongTokenType
 		}

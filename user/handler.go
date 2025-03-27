@@ -6,7 +6,7 @@ import (
 	"link_shorten_server/user/dao"
 	user "link_shorten_server/user/kitex_gen/user"
 	"link_shorten_server/user/response"
-	"link_shorten_server/user/utils"
+	utils2 "link_shorten_server/utils"
 )
 
 // UserServiceImpl implements the last service interface defined in the IDL.
@@ -46,7 +46,7 @@ func (s *UserServiceImpl) UserRegister(ctx context.Context, req *user.UserRegist
 	}
 	//3.插入新用户信息
 	//3.1.加密密码
-	hashedPwd, err := utils.HashPassword(req.Password)
+	hashedPwd, err := utils2.HashPassword(req.Password)
 	if err != nil {
 		retErr := response.InternalErr(err)
 		return &user.UserRegisterResponse{Status: &retErr}, nil
@@ -78,7 +78,7 @@ func (s *UserServiceImpl) UserLogin(ctx context.Context, req *user.UserLoginRequ
 		return &user.UserLoginResponse{Status: &status}, nil
 	}
 	//2.2.检验密码
-	result, err = utils.CompareHashPwdAndPwd(hashedPwd, req.Password)
+	result, err = utils2.CompareHashPwdAndPwd(hashedPwd, req.Password)
 	if err != nil {
 		retErr := response.InternalErr(err)
 		return &user.UserLoginResponse{Status: &retErr}, nil
@@ -93,7 +93,7 @@ func (s *UserServiceImpl) UserLogin(ctx context.Context, req *user.UserLoginRequ
 		return &user.UserLoginResponse{Status: &response.WrongPassword}, nil
 	}
 	//3.2.生成token
-	accessToken, refreshToken, err := utils.GenerateTokens(int(userID))
+	accessToken, refreshToken, err := utils2.GenerateTokens(int(userID))
 	if err != nil {
 		retErr := response.InternalErr(err)
 		return &user.UserLoginResponse{Status: &retErr}, nil
@@ -109,12 +109,12 @@ func (s *UserServiceImpl) UserLogin(ctx context.Context, req *user.UserLoginRequ
 func (s *UserServiceImpl) TokenRefresh(ctx context.Context, req *user.TokenRefreshRequest) (resp *user.TokenRefreshResponse, err error) {
 	var emptyStatus user.Status
 	//1.验证refreshToken
-	token, status := utils.ValidateRefreshToken(req.RefreshToken)
+	token, status := utils2.ValidateRefreshToken(req.RefreshToken)
 	if token == nil || status != emptyStatus {
 		return &user.TokenRefreshResponse{Status: &response.InvalidToken}, nil
 	}
 	//2.生成新的token
-	accessToken, refreshToken, err := utils.GenerateTokens(int(token.Claims.(jwt.MapClaims)["user_id"].(float64)))
+	accessToken, refreshToken, err := utils2.GenerateTokens(int(token.Claims.(jwt.MapClaims)["user_id"].(float64)))
 	if err != nil {
 		retErr := response.InternalErr(err)
 		return &user.TokenRefreshResponse{Status: &retErr}, nil

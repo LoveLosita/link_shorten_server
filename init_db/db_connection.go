@@ -1,4 +1,4 @@
-package dao
+package init_db
 
 import (
 	"gorm.io/driver/mysql"

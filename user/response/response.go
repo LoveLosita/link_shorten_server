@@ -6,13 +6,6 @@ func InternalErr(err error) user.Status {
 	return user.Status{Code: "500", Message: err.Error()}
 }
 
-func ResponseTo(err error) user.Status {
-	if err == nil {
-		return user.Status{}
-	}
-	return user.Status{Code: "500", Message: err.Error()}
-}
-
 var (
 	Ok = user.Status{ //正常,和客户端统一
 		Code:    "10000",
