@@ -67,7 +67,7 @@ func UpdateLinkRanking(userID int) link.Status {
 	return link.Status{}
 }
 
-func IfLinkExists(longUrl string) (bool, string, link.Status) {
+func GetLinkIfExists(longUrl string) (bool, string, link.Status) {
 	//1.先看看该长链接是否已经在表单中
 	var shortLinks model.ShortLinks
 	result := init_db.Db.Table("short_links").Where("long_url = ?", longUrl).First(&shortLinks)
@@ -81,4 +81,20 @@ func IfLinkExists(longUrl string) (bool, string, link.Status) {
 	}
 	//2.如果有，则返回true和短链
 	return true, shortLinks.Shortcode, link.Status{}
+}
+
+func GetLongUrlByShortUrl(shortUrl string) (string, link.Status) {
+	//1.先看看该短链接是否已经在表中
+	var shortLinks model.ShortLinks
+	result := init_db.Db.Table("short_links").Where("shortcode = ?", shortUrl).First(&shortLinks)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			//如果没有，则返回错误
+			return "", response.LinkNotExists
+		} else {
+			return "", response.InternalErr(result.Error)
+		}
+	}
+	//2.如果有，则返回长链接
+	return shortLinks.LongUrl, link.Status{}
 }

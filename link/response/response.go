@@ -17,4 +17,8 @@ var (
 		Code:    "41001",
 		Message: "request is empty",
 	}
+	LinkNotExists = link.Status{ //链接不存在
+		Code:    "41002",
+		Message: "link not exists",
+	}
 )

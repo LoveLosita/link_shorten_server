@@ -32,7 +32,7 @@ func (s *LinkServiceImpl) GenerateLink(ctx context.Context, req *link.GenerateLi
 	}
 	//2.获取url，并生成短链，存入数据库
 	//2.1.先检查url是否已经存在
-	result, shortCode, status := dao.IfLinkExists(req.LongUrl)
+	result, shortCode, status := dao.GetLinkIfExists(req.LongUrl)
 	if status != emptyStatus {
 		return &link.GenerateLinkResponse{Status: &status}, nil
 	}
@@ -96,6 +96,18 @@ func (s *LinkServiceImpl) SeeUserLink(ctx context.Context, req *link.SeeUserLink
 
 // LinkRedirect implements the LinkServiceImpl interface.
 func (s *LinkServiceImpl) LinkRedirect(ctx context.Context, req *link.LinkRedirectRequest) (resp *link.LinkRedirectResponse, err error) {
-	// TODO: Your code here...
-	return
+	var emptyStatus link.Status
+	//1.获取短链
+	shortCode := req.ShortUrl
+	//2.获取长链
+	longUrl, status := dao.GetLongUrlByShortUrl(shortCode)
+	if status != emptyStatus {
+		return &link.LinkRedirectResponse{Status: &status}, nil
+	}
+	//3.返回长链
+	resp = &link.LinkRedirectResponse{
+		LongUrl: &longUrl,
+		Status:  &response.Ok,
+	}
+	return resp, nil
 }
