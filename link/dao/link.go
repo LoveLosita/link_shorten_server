@@ -1,12 +1,16 @@
 package dao
 
 import (
+	"context"
 	"errors"
+	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 	"link_shorten_server/init_db"
 	"link_shorten_server/link/kitex_gen/link"
 	"link_shorten_server/link/model"
 	"link_shorten_server/link/response"
+	"link_shorten_server/redis_client"
+	"time"
 )
 
 func InsertLink1(longUrl string, userID int) (int, link.Status) {
@@ -84,7 +88,18 @@ func GetLinkIfExists(longUrl string) (bool, string, link.Status) {
 }
 
 func GetLongUrlByShortUrl(shortUrl string) (string, link.Status) {
-	//1.先看看该短链接是否已经在表中
+	//1.先看看该短链接是否在缓存中
+	longUrl, err := redis_client.Re.Get(context.Background(), shortUrl).Result()
+	if err != nil {
+		if errors.Is(err, redis.Nil) { //不做处理
+		} else {
+			return "", response.InternalErr(err)
+		}
+	}
+	if longUrl != "" { //如果在缓存中，则直接返回
+		return longUrl, link.Status{}
+	}
+	//2.如果不在缓存中，再看看该短链接是否已经在表中
 	var shortLinks model.ShortLinks
 	result := init_db.Db.Table("short_links").Where("shortcode = ?", shortUrl).First(&shortLinks)
 	if result.Error != nil {
@@ -95,6 +110,11 @@ func GetLongUrlByShortUrl(shortUrl string) (string, link.Status) {
 			return "", response.InternalErr(result.Error)
 		}
 	}
-	//2.如果有，则返回长链接
+	//2.如果在表中却不在缓存中，将其加入缓存
+	err = redis_client.Re.Set(context.Background(), shortUrl, shortLinks.LongUrl, 5*time.Minute).Err()
+	if err != nil {
+		return "", response.InternalErr(err)
+	}
+	//3.最后返回长链接
 	return shortLinks.LongUrl, link.Status{}
 }
